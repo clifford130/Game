@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Guessing Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="number"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 200px;
+            margin: 10px 0;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 5px;
+            cursor: pointer;
+        }
+
+        #feedback {
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Number Guessing Game</h1>
+        <p>Choose a difficulty level:</p>
+        <select id="difficulty" onchange="setDifficulty()">
+            <option value="100">Easy (1-100)</option>
+            <option value="500">Medium (1-500)</option>
+            <option value="1000">Hard (1-1000)</option>
+        </select>
+        <p>I'm thinking of a number between 1 and <span id="maxNumber">100</span>. Can you guess what it is?</p>
+        <input type="number" id="guessInput" placeholder="Enter your guess">
+        <button onclick="makeGuess()">Guess</button>
+        <button onclick="resetGame()">Reset</button>
+        <p id="feedback"></p>
+        <p>Attempts: <span id="attempts">0</span></p>
+        <p>High Score: <span id="highScore">N/A</span></p>
+    </div>
+    <audio id="correctSound" src="correct.mp3" preload="auto"></audio>
+    <audio id="wrongSound" src="wrong.mp3" preload="auto"></audio>
+    <script>
+        let numberToGuess;
+        let attempts;
+        let highScore = Infinity;
+        let maxNumber = 100;
+
+        function initializeGame() {
+            numberToGuess = Math.floor(Math.random() * maxNumber) + 1;
+            attempts = 0;
+            document.getElementById('feedback').innerText = '';
+            document.getElementById('attempts').innerText = attempts;
+            document.getElementById('guessInput').value = '';
+        }
+
+        function setDifficulty() {
+            const difficulty = document.getElementById('difficulty').value;
+            maxNumber = Number(difficulty);
+            document.getElementById('maxNumber').innerText = maxNumber;
+            resetGame();
+        }
+
+        function makeGuess() {
+            const userGuess = Number(document.getElementById('guessInput').value);
+            if (!userGuess || userGuess < 1 || userGuess > maxNumber) {
+                document.getElementById('feedback').innerText = `Please enter a number between 1 and ${maxNumber}.`;
+                return;
+            }
+            attempts += 1;
+            document.getElementById('attempts').innerText = attempts;
+
+            if (userGuess < numberToGuess) {
+                document.getElementById('feedback').innerText = 'Too low. Try again.';
+                playSound('wrongSound');
+            } else if (userGuess > numberToGuess) {
+                document.getElementById('feedback').innerText = 'Too high. Try again.';
+                playSound('wrongSound');
+            } else {
+                document.getElementById('feedback').innerText = `Congratulations! You guessed the right number in ${attempts} attempts.`;
+                playSound('correctSound');
+                if (attempts < highScore) {
+                    highScore = attempts;
+                    document.getElementById('highScore').innerText = attempts;
+                }
+            }
+        }
+
+        function playSound(soundId) {
+            const sound = document.getElementById(soundId);
+            sound.pause();
+            sound.currentTime = 0;
+            sound.play().catch(error => {
+                console.log(`Error playing sound: ${error}`);
+            });
+        }
+
+        function resetGame() {
+            initializeGame();
+        }
+
+        // Initialize the game when the page loads
+        window.onload = initializeGame;
+
+    </script>
+</body>
+</html>
